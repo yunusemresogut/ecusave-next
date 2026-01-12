@@ -9,7 +9,7 @@ import ScrollToTop from "./components/ScrollToTop";
 
 export default function Home() {
   return (
-    <div>
+    <div id="home">
       <Header />
       <main className="pt-20 scroll-smooth">
         <Hero />

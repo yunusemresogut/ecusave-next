@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Select from "react-select";
 import { useLang } from "../../context/LanguageContext";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaBolt, FaTachometerAlt, FaInfoCircle } from "react-icons/fa";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -101,18 +101,22 @@ export default function TuningCalculator() {
   const reset = () => setResult(null);
 
   return (
-    <div className="mx-auto px-12">
-      <div className="grid md:grid-cols-2 gap-10 items-center">
+    <div className="mx-auto px-6 md:px-12 max-w-7xl">
+      <div className="grid md:grid-cols-2 gap-12 items-center">
         {/* Sol taraf açıklama */}
-        <div>
-          <h3 className="text-5xl font-semibold mb-4">{t("tuning")}</h3>
-          <p className="text-gray-600 leading-relaxed text-xl">{t("tuningDesc")}</p>
+        <div className="space-y-6">
+          <h3 className="text-4xl md:text-5xl font-extrabold pb-4 bg-gradient-to-r from-rose-500 to-orange-600 bg-clip-text text-transparent">
+            {t("tuning")}
+          </h3>
+          <p className="text-gray-600 leading-relaxed text-lg md:text-xl">{t("tuningDesc")}</p>
+          <div className="w-24 h-1 bg-gradient-to-r from-rose-500 to-orange-600 rounded-full"></div>
         </div>
 
         {/* Sağ taraf */}
-        <div className="bg-gray-50 p-6 rounded-lg shadow-md">
+        <div className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-gray-200">
           {!result ? (
             <>
+              {/* Dropdownlar */}
               <div className="flex flex-col gap-4 mb-6">
                 <Select
                   instanceId="marka"
@@ -120,6 +124,7 @@ export default function TuningCalculator() {
                   placeholder={t("marka")}
                   value={form.marka}
                   onChange={(opt) => setForm({ ...form, marka: opt })}
+                  className="rounded-lg"
                 />
                 <Select
                   instanceId="model"
@@ -128,6 +133,7 @@ export default function TuningCalculator() {
                   value={form.model}
                   onChange={(opt) => setForm({ ...form, model: opt })}
                   isDisabled={!form.marka}
+                  className="rounded-lg"
                 />
                 <Select
                   instanceId="yil"
@@ -136,6 +142,7 @@ export default function TuningCalculator() {
                   value={form.yil}
                   onChange={(opt) => setForm({ ...form, yil: opt })}
                   isDisabled={!form.model}
+                  className="rounded-lg"
                 />
                 <Select
                   instanceId="motor"
@@ -144,11 +151,14 @@ export default function TuningCalculator() {
                   value={form.motor}
                   onChange={(opt) => setForm({ ...form, motor: opt })}
                   isDisabled={!form.yil}
+                  className="rounded-lg"
                 />
               </div>
+
+              {/* Hesapla butonu */}
               <button
                 onClick={calculate}
-                className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg cursor-pointer hover:bg-blue-700 transition disabled:bg-gray-400"
+                className="w-full bg-gradient-to-r from-rose-600 to-orange-600 hover:from-orange-600 hover:to-rose-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition disabled:from-gray-400 disabled:to-gray-400"
                 disabled={!form.motor}
               >
                 {t("calculate")}
@@ -157,19 +167,19 @@ export default function TuningCalculator() {
           ) : (
             <div>
               {/* Geri butonu */}
-              <button onClick={reset} className="flex items-center gap-2 text-blue-600 mb-6 hover:underline">
-                <FaArrowLeft /> {t("back")}
+              <button onClick={reset} className="flex items-center gap-2 text-rose-600 mb-6 hover:underline">
+                <FaArrowLeft /> Back
               </button>
 
               {/* Seçimler */}
               <div className="mb-6 p-4 bg-gray-50 rounded-lg shadow-sm">
-                <div className="text-gray-700">
+                <div className="text-gray-700 font-medium">
                   {form.marka?.label} - {form.model?.label} - {form.yil?.label} - {form.motor?.label}
                 </div>
               </div>
 
               {/* Sonuç kartı */}
-              <div className="p-6 bg-white border border-gray-200 rounded-lg shadow-md">
+              <div className="p-6 bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl shadow-xl space-y-6">
                 {result?.data?.message?.map((item, index) => {
                   const origHP = Number(item.org_hp);
                   const chipHP = Number(item.chip_tuninghp);
@@ -185,66 +195,72 @@ export default function TuningCalculator() {
                   const description = item.description ? JSON.parse(item.description) : {};
 
                   return (
-                    <div key={index} className="space-y-4">
-                      {/* Güç ve Tork */}
+                    <div key={index} className="space-y-6">
+                      {/* Power & Torque */}
                       <div className="grid grid-cols-2 gap-6">
-                        <div className="p-4 bg-gray-50 rounded-lg">
-                          <h5 className="font-semibold mb-2">Güç (HP)</h5>
+                        <div className="p-4 bg-rose-50 rounded-xl shadow-inner hover:scale-105 transition-transform duration-300">
+                          <h5 className="font-semibold mb-2 text-rose-600 flex items-center gap-2">
+                            <FaBolt /> Power (HP)
+                          </h5>
                           <p>
-                            Orijinal: <span className="font-medium">{origHP}</span>
+                            Original: <span className="font-bold">{origHP}</span>
                           </p>
                           <p>
-                            Chip Tuning: <span className="font-medium">{chipHP}</span>
+                            Chip Tuning: <span className="font-bold">{chipHP}</span>
                           </p>
                           <p>
-                            Fark:{" "}
-                            <span className="font-medium">
+                            Difference:{" "}
+                            <span className="font-bold text-green-600">
                               {hpDiff} HP ({hpPercent}%)
                             </span>
                           </p>
                         </div>
 
-                        <div className="p-4 bg-gray-50 rounded-lg">
-                          <h5 className="font-semibold mb-2">Tork (Nm)</h5>
+                        <div className="p-4 bg-orange-50 rounded-xl shadow-inner hover:scale-105 transition-transform duration-300">
+                          <h5 className="font-semibold mb-2 text-orange-600 flex items-center gap-2">
+                            <FaTachometerAlt /> Torque (Nm)
+                          </h5>
                           <p>
-                            Orijinal: <span className="font-medium">{origNM}</span>
+                            Original: <span className="font-bold">{origNM}</span>
                           </p>
                           <p>
-                            Chip Tuning: <span className="font-medium">{chipNM}</span>
+                            Chip Tuning: <span className="font-bold">{chipNM}</span>
                           </p>
                           <p>
-                            Fark:{" "}
-                            <span className="font-medium">
+                            Difference:{" "}
+                            <span className="font-bold text-green-600">
                               {nmDiff} Nm ({nmPercent}%)
                             </span>
                           </p>
                         </div>
                       </div>
 
-                      {/* Diğer bilgiler */}
-                      <div className="p-4 bg-gray-100 rounded-lg">
-                        <h5 className="font-semibold mb-2">Beyin & Açıklama</h5>
+                      {/* Additional Info */}
+                      <div className="p-4 bg-gray-100 rounded-xl border border-gray-200 space-y-2">
+                        <h5 className="font-semibold mb-2 text-gray-800 flex items-center gap-2">
+                          <FaInfoCircle /> ECU & Details
+                        </h5>
                         {description["Beyin Marka Modeli"] && (
                           <p>
-                            <span className="font-medium">Beyin: </span>
+                            <span className="font-medium">ECU: </span>
                             {description["Beyin Marka Modeli"]}
                           </p>
                         )}
                         {description["Nesil"] && (
                           <p>
-                            <span className="font-medium">Nesil: </span>
+                            <span className="font-medium">Generation: </span>
                             {description["Nesil"]}
                           </p>
                         )}
                         {description["Orjinal Hp"] && (
                           <p>
-                            <span className="font-medium">Orijinal HP (Detay): </span>
+                            <span className="font-medium">Original HP (Detail): </span>
                             {description["Orjinal Hp"]}
                           </p>
                         )}
                         {description["Chip Tuning Hp"] && (
                           <p>
-                            <span className="font-medium">Chip Tuning HP (Detay): </span>
+                            <span className="font-medium">Chip Tuning HP (Detail): </span>
                             {description["Chip Tuning Hp"]}
                           </p>
                         )}
